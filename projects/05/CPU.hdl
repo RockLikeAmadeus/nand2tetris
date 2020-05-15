@@ -1,0 +1,139 @@
+// This file is part of www.nand2tetris.org
+// and the book "The Elements of Computing Systems"
+// by Nisan and Schocken, MIT Press.
+// File name: projects/05/CPU.hdl
+
+/**
+ * The Hack CPU (Central Processing unit), consisting of an ALU,
+ * two registers named A and D, and a program counter named PC.
+ * The CPU is designed to fetch and execute instructions written in 
+ * the Hack machine language. In particular, functions as follows:
+ * Executes the inputted instruction according to the Hack machine 
+ * language specification. The D and A in the language specification
+ * refer to CPU-resident registers, while M refers to the external
+ * memory location addressed by A, i.e. to Memory[A]. The inM input 
+ * holds the value of this location. If the current instruction needs 
+ * to write a value to M, the value is placed in outM, the address 
+ * of the target location is placed in the addressM output, and the 
+ * writeM control bit is asserted. (When writeM==0, any value may 
+ * appear in outM). The outM and writeM outputs are combinational: 
+ * they are affected instantaneously by the execution of the current 
+ * instruction. The addressM and pc outputs are clocked: although they 
+ * are affected by the execution of the current instruction, they commit 
+ * to their new values only in the next time step. If reset==1 then the 
+ * CPU jumps to address 0 (i.e. pc is set to 0 in next time step) rather 
+ * than to the address resulting from executing the current instruction. 
+ */
+
+CHIP CPU {
+
+    IN  inM[16],         // M value input  (M = contents of RAM[A])
+        instruction[16], // Instruction for execution
+        reset;           // Signals whether to re-start the current
+                         // program (reset==1) or continue executing
+                         // the current program (reset==0).
+
+    OUT outM[16],        // M value output
+        writeM,          // Write to M? 
+        addressM[15],    // Address in data memory (of M)
+        pc[15];          // address of next instruction
+
+    PARTS:
+    // Put your code here:
+
+    // Multiplexor 1
+    Not(in=instruction[15], out=isAInstruction);
+    Not(in=isAInstruction, out=isCInstruction);
+    Mux16(a=aluOut, b=instruction, sel=isAInstruction, out=mux1Out);
+
+    // A Register
+    And(a=instruction[15], b=instruction[5], out=writeToA);
+    Or(a=isAInstruction, b=writeToA, out=loadA);
+    ARegister(in=mux1Out, load=loadA, out=outputA, out[0..14]=addressM);
+
+    // Multiplexor 2
+    Mux16(a=outputA, b=inM, sel=instruction[12], out=mux2Out);
+
+    // D Register
+    And(a=instruction[4], b=isCInstruction, out=loadDRegister);
+    DRegister(in=aluOut, load=loadDRegister, out=outputD);
+
+    // ALU
+    ALU(x=outputD,
+        y=mux2Out,
+        zx=instruction[11],
+        nx=instruction[10],
+        zy=instruction[9],
+        ny=instruction[8],
+        f=instruction[7],
+        no=instruction[6],
+        out=aluOut,
+        out=outM,
+        zr=zr,
+        ng=ng
+        );
+
+    // Write to M
+    And(a=instruction[15], b=instruction[3], out=writeM);
+
+    // Program Counter
+
+    Not(in=zr, out=notZero);
+    Not(in=ng, out=notNegative);
+
+    And(a=notZero, b=notNegative, out=positive);
+    And(a=zr, b=notNegative, out=zero);
+    And(a=notZero, b=ng, out=negative);
+
+    Or(a=zero, b=positive, out=greaterThanOrEqual);
+    Or(a=zero, b=negative, out=lessThanOrEqual);
+
+    Not(in=instruction[2], out=notJ1);
+    Not(in=instruction[1], out=notJ2);
+    Not(in=instruction[0], out=notJ3);
+
+    Not(in=notJ1, out=J1);
+    Not(in=notJ2, out=J2);
+    Not(in=notJ3, out=J3);
+
+    And(a=notJ1, b=notJ2, out=notJ1andNotJ2);
+    And(a=notJ1, b=notJ3, out=notJ1andNotJ3);
+    And(a=notJ2, b=notJ3, out=notJ2andNotJ3);
+
+    And(a=J2, b=J3, out=J2andJ3);
+    And(a=J1, b=J3, out=J1andJ3);
+    And(a=J1, b=J2, out=J1andJ2);
+
+    And(a=notJ1andNotJ2, b=J3, out=jgtInstruction);
+    And(a=notJ1andNotJ3, b=J2, out=jeqInstruction);
+    And(a=notJ1, b=J2andJ3, out=jgeInstruction);
+    And(a=J1, b=notJ2andNotJ3, out=jltInstruction);
+    And(a=J1andJ3, b=notJ2, out=jneInstruction);
+    And(a=J1andJ2, b=notJ3, out=jleInstruction);
+    And(a=J1andJ2, b=J3, out=jmp);
+
+    And(a=jgtInstruction, b=positive, out=jgt);
+    And(a=jeqInstruction, b=zero, out=jeq);
+    And(a=jgeInstruction, b=greaterThanOrEqual, out=jge);
+    And(a=jltInstruction, b=negative, out=jlt);
+    And(a=jneInstruction, b=notZero, out=jne);
+    And(a=jleInstruction, b=lessThanOrEqual, out=jle);
+
+    Or8Way(in[0]=jgt,
+           in[1]=jeq,
+           in[2]=jge,
+           in[3]=jlt,
+           in[4]=jne,
+           in[5]=jle,
+           in[6]=jmp,
+           out=jumpTrue);
+
+    And(a=jumpTrue, b=isCInstruction, out=shouldJump);
+    Not(in=shouldJump, out=shouldNotJump);
+
+    PC(in=outputA, reset=reset, load=shouldJump, inc=shouldNotJump, out[0..14]=pc);
+
+
+
+
+}
