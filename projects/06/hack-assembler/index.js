@@ -2,6 +2,7 @@
 
 const fs = require('fs');
 const cleaner = require('./cleaner');
+const translate = require('./translator');
 
 // Read the file in
 let file = fs.readFileSync(process.argv[2], 'utf8');
@@ -9,6 +10,10 @@ let file = fs.readFileSync(process.argv[2], 'utf8');
 let progRaw = file.split('\n');
 // Clean white space and comments from the program
 let prog = cleaner(progRaw);
+
+
+
+prog = translate(prog);
 
 for (let i = 0; i < prog.length; i++) {
 
