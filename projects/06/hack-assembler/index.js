@@ -33,6 +33,7 @@ console.log('');
 console.log('////////////////////////');
 console.log('');
 
+// Remove all symbols from the program
 prog = unlabel(prog);
 
 for (let i = 0; i < prog.length; i++) {
