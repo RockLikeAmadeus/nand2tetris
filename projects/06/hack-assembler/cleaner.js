@@ -20,7 +20,7 @@ module.exports = function(fileAsArray) {
 
         // Remove comments
         let commentIndex = line.indexOf('//');
-        switch(commentIndex) {
+        switch (commentIndex) {
             case 0:
                 break;
             case -1:
