@@ -6,9 +6,9 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "add": "node index.js '../add/Add.asm'",
-    "max": "node index.js '../max/MaxL.asm'",
-    "rect": "node index.js '../rect/RectL.asm'",
-    "pong": "node index.js '../pong/PongL.asm'"
+    "max": "node index.js '../max/Max.asm'",
+    "rect": "node index.js '../rect/Rect.asm'",
+    "pong": "node index.js '../pong/Pong.asm'"
   },
   "author": "Alec Hampton",
   "license": "ISC"
