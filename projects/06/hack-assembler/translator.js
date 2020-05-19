@@ -140,7 +140,7 @@ function translateComp(comp) {
         case 'D-M':
             return '1010011';
         case 'M-D':
-            return '1010011';
+            return '1000111';
         case 'D&M':
             return '1000000';
         case 'D|M':

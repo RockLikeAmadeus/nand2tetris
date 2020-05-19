@@ -28,6 +28,16 @@ console.log('');
 
 prog = translate(prog);
 
+
+// Write assembled program to file
+fs.writeFile(
+    `${process.argv[2].substring(0, process.argv[2].length-3)}hack`,
+    prog.join('\n'),
+    (err) => {
+        if (err) return console.log(err);
+        console.log('Translation success');
+    });
+
 for (let i = 0; i < prog.length; i++) {
 
     let line = prog[i];
