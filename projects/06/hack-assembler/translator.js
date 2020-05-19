@@ -61,8 +61,6 @@ function translateCInstruction(ins) {
         translateComp(comp) +
         translateDest(dest) +
         translateJump(jump);
-    
-
 
     return machineInstruction;
 }
