@@ -43,7 +43,7 @@ module.exports = function(prog) {
         let line = prog[i];
         if (line[0] == '(' && line[line.length-1] == ')') {
             symbols[line.substring(1, line.length-1)]
-                = (i+numLabelsFound).toString();
+                = (i-numLabelsFound).toString();
             numLabelsFound++;
         }
         else {
