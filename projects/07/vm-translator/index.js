@@ -1,6 +1,7 @@
 "use strict";
 
 const fs = require('fs');
+const clean = require('./cleaner');
 
 // Read the file in
 let file = fs.readFileSync(process.argv[2], 'utf8');
@@ -23,3 +24,10 @@ function printProgram(prog) {
         console.log(`${i}\t${line}`);
     }
 }
+
+// Clean white space and comments from the program
+let prog = clean(progRaw);
+
+console.log('Without white space or comments:\n');
+printProgram(prog);
+printSeparator();
