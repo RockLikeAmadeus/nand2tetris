@@ -1,6 +1,7 @@
 "use strict";
 
 const printer = require('./printer')
+const LabelMaker = require('./label-maker');
 
 module.exports = function translate(prog) {
 
@@ -38,9 +39,17 @@ module.exports = function translate(prog) {
         } else if (terms.length == 1) {
             // Arithmetic / Logic command
             switch(command) {
+                // Handle binary operators
                 case 'add':
-                    result = result.concat(add());
+                case 'sub':
+                case 'eq':
+                case 'gt':
+                case 'lt':
+                case 'and':
+                case 'or':
+                    result = result.concat(binaryOp(command));
                     break;
+                // Handle unary operators
             }
         }
     }
@@ -100,12 +109,62 @@ function popStackIntoDAndMRegisters() {
 }
 
 // Returns an array containing the hack instructions necessary
-// to add the top two values in the stack
-function add() {
+// to perform a binary operation on the top two values in the stack
+function binaryOp(operator) {
+    if (!['add', 'sub', 'eq', 'gt', 'lt', 'and', 'or'].includes(operator)) {
+        return [];
+    }
+
     let hackInstructions = popStackIntoDAndMRegisters();
-    // add D to M
-    hackInstructions.push('D=D+M');
+
+    switch(operator) {
+        case 'add':
+            hackInstructions.push('D=D+M');
+            break;
+        case 'sub':
+            hackInstructions.push('D=M-D');
+            break;
+        case 'and':
+            hackInstructions.push('D=D&M');
+            break;
+        case 'or':
+            hackInstructions.push('D=D|M');
+            break;
+        case 'eq':
+        case 'gt':
+        case 'lt':
+            hackInstructions = hackInstructions.concat(comparisonOp(operator));
+
+    }
+    
     // *SP = D; SP++;
     hackInstructions = hackInstructions.concat(pushDRegister());
+    return hackInstructions;
+}
+
+function comparisonOp(operator) {
+    const hackInstructions = []
+    const location1 = LabelMaker.GetLabel();
+    const end = LabelMaker.GetLabel();
+    hackInstructions.push(`@${location1}`);
+
+    switch (operator) {
+        case 'eq':
+            hackInstructions.push('M-D;JNE');
+            break;
+        case 'gt':
+            hackInstructions.push('M-D;JGT');
+            break;
+        case 'lt':
+            hackInstructions.push('M-D;JLT');
+            break;
+    }
+
+    hackInstructions.push('D=-1') // TRUE
+    hackInstructions.push(`@${end}`)
+    hackInstructions.push('0;JMP');
+    hackInstructions.push(`(${location1})`);
+    hackInstructions.push('D=0') // FALSE
+    hackInstructions.push(`(${end})`);
     return hackInstructions;
 }
