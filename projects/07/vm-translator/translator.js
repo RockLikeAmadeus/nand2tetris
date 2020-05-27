@@ -26,7 +26,7 @@ module.exports = function translate(prog) {
                 case 'push':
                     switch(segment) {
                         case 'constant':
-                            console.log("push constant!")
+                            result = result.concat(pushValue(argument));
                             break;
                     }
                     break;
@@ -45,4 +45,17 @@ module.exports = function translate(prog) {
 
     printer.printProgram(result);
 
+}
+
+// Returns an array containing the hack instructions necessary
+// to push a constant value onto the stack
+function pushValue(val) {
+    console.log("hi");
+    let hackInstructions = [];
+    hackInstructions.push(`@${val}`);
+    hackInstructions.push('D=A');
+    hackInstructions.push('@SP');
+    hackInstructions.push('A=M');
+    hackInstructions.push('M=D');
+    return hackInstructions;
 }
