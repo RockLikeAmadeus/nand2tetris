@@ -50,6 +50,10 @@ module.exports = function translate(prog) {
                     result = result.concat(binaryOp(command));
                     break;
                 // Handle unary operators
+                case 'neg':
+                case 'not':
+                    result = result.concat(unaryOp(command));
+                    break;
             }
         }
     }
@@ -134,7 +138,7 @@ function binaryOp(operator) {
         case 'gt':
         case 'lt':
             hackInstructions = hackInstructions.concat(comparisonOp(operator));
-
+            break;
     }
     
     // *SP = D; SP++;
@@ -166,5 +170,26 @@ function comparisonOp(operator) {
     hackInstructions.push(`(${location1})`);
     hackInstructions.push('D=0') // FALSE
     hackInstructions.push(`(${end})`);
+    return hackInstructions;
+}
+
+function unaryOp(operator) {
+    if (!['neg', 'not'].includes(operator)) {
+        return [];
+    }
+
+    let hackInstructions = popStackIntoDRegister();
+
+    switch (operator) {
+        case 'neg':
+            hackInstructions.push('D=-D');
+            break;
+        case 'not':
+            hackInstructions.push('D=!D');
+            break;
+    }
+    
+    // *SP = D; SP++;
+    hackInstructions = hackInstructions.concat(pushDRegister());
     return hackInstructions;
 }
