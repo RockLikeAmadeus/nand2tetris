@@ -19,6 +19,19 @@ let prog = clean(progRaw);
 console.log('Without white space or comments:\n');
 printer.printProgram(prog);
 printer.printSeparator();
+printer.printSeparator();
 
 // Translate VM Code
-translate(prog);
+prog = translate(prog);
+printer.printProgram(prog);
+
+// Write translated program to file
+fs.writeFile(
+    `${process.argv[2].substring(0, process.argv[2].length-2)}asm`,
+    prog.join('\n'),
+    (err) => {
+        if (err) return console.log(err);
+        printer.printSeparator();
+        console.log('Translation succeeded.');
+        printer.printSeparator();
+    });

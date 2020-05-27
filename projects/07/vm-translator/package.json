@@ -6,7 +6,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "basic-test": "node index.js '../MemoryAccess/BasicTest/BasicTest.vm'",
-    "simple-add": "node index.js '../StackArithmetic/SimpleAdd/SimpleAdd.vm'"
+    "simple-add": "node index.js '../StackArithmetic/SimpleAdd/SimpleAdd.vm'",
+    "stack-test": "node index.js '../StackArithmetic/StackTest/StackTest.vm'"
   },
   "author": "Alec Hampton",
   "license": "ISC"

@@ -45,7 +45,7 @@ module.exports = function translate(prog) {
         }
     }
 
-    printer.printProgram(result);
+    return result;
 }
 
 // Returns an array containing the hack instructions necessary
@@ -60,6 +60,8 @@ function pushValue(val) {
     return hackInstructions;
 }
 
+// Returns an array containing the hack instructions necessary
+// to push the value of the D register onto the stack
 function pushDRegister() {
     let hackInstructions = [];
     // *SP = D
@@ -72,23 +74,36 @@ function pushDRegister() {
     return hackInstructions;
 }
 
-// Returns an array containing the hack instructions necessary
-// to add the top two values in the stack
-function add() {
+function popStackIntoMRegister() {
     let hackInstructions = [];
     // SP--
     hackInstructions.push('@SP');
     hackInstructions.push('M=M-1');
-    // D = *SP
+    // M = *SP
     hackInstructions.push('@SP');
     hackInstructions.push('A=M');
+    return hackInstructions;
+}
+
+function popStackIntoDRegister() {
+    // SP--; M = *SP;
+    let hackInstructions = popStackIntoMRegister();
+    // D = M
     hackInstructions.push('D=M');
-    // SP--
-    hackInstructions.push('@SP');
-    hackInstructions.push('M=M-1');
-    // D = D + *SP
-    hackInstructions.push('@SP');
-    hackInstructions.push('A=M');
+    return hackInstructions;
+}
+
+function popStackIntoDAndMRegisters() {
+    let hackInstructions = popStackIntoDRegister();
+    hackInstructions = hackInstructions.concat(popStackIntoMRegister());
+    return hackInstructions
+}
+
+// Returns an array containing the hack instructions necessary
+// to add the top two values in the stack
+function add() {
+    let hackInstructions = popStackIntoDAndMRegisters();
+    // add D to M
     hackInstructions.push('D=D+M');
     // *SP = D; SP++;
     hackInstructions = hackInstructions.concat(pushDRegister());
