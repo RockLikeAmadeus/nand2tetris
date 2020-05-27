@@ -50,12 +50,16 @@ module.exports = function translate(prog) {
 // Returns an array containing the hack instructions necessary
 // to push a constant value onto the stack
 function pushValue(val) {
-    console.log("hi");
     let hackInstructions = [];
+    // D = val
     hackInstructions.push(`@${val}`);
     hackInstructions.push('D=A');
+    // *SP = D
     hackInstructions.push('@SP');
     hackInstructions.push('A=M');
     hackInstructions.push('M=D');
+    // SP++
+    hackInstructions.push('@SP');
+    hackInstructions.push('M=M+1');
     return hackInstructions;
 }
