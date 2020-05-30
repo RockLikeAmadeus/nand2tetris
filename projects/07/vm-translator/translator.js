@@ -29,10 +29,29 @@ module.exports = function translate(prog) {
                         case 'constant':
                             result = result.concat(pushValue(argument));
                             break;
+                        case 'local':
+                        case 'argument':
+                        case 'this':
+                        case 'that':
+                            result = result.concat(
+                                retrieveSegmentValueIntoD(
+                                    segment, argument
+                                ))
+                            result = result.concat(pushDRegister());
                     }
                     break;
                 case 'pop':
-                    console.log('pop!');
+                    switch(segment) {
+                        case 'local':
+                        case 'argument':
+                        case 'this':
+                        case 'that':
+                            result = result.concat(
+                                loadFocusPointer(segment, argument)
+                            );
+                            result = result.concat(popStackIntoDRegister());
+                            result = result.concat(loadMemoryWithDRegister());
+                    }
                     break;
             }
 
@@ -73,6 +92,75 @@ function pushValue(val) {
     return hackInstructions;
 }
 
+function retrieveSegmentValueIntoD(segment, argument) {
+    let hackInstructions = [];
+    let pointer = '';
+    if (['local', 'argument', 'this', 'that'].includes(segment)) {
+        switch(segment) {
+            case 'local':
+                pointer = 'LCL'
+                break;
+            case 'argument':
+                pointer = 'ARG'
+                break;
+            case 'this':
+                pointer = 'THIS'
+                break;
+            case 'that':
+                pointer = 'THAT'
+                break;
+        }
+
+        hackInstructions.push(`@${pointer}`);
+        hackInstructions.push('D=M');
+        hackInstructions.push(`@${argument}`);
+        hackInstructions.push('D=D+A');
+        hackInstructions.push('A=D');
+        hackInstructions.push('D=M');
+    }
+    return hackInstructions;
+}
+
+// Loads D into the address pointed to by the variable focuspointer
+function loadMemoryWithDRegister() {
+    let hackInstructions = [];
+    hackInstructions.push('@focuspointer');
+    hackInstructions.push('A=M');
+    hackInstructions.push('M=D');
+    return hackInstructions;
+}
+
+// Loads a variable named focuspointer with the address of the specific value
+// within a specfic memory segment which is the focus of this VM command
+function loadFocusPointer(segment, argument) {
+    let hackInstructions = [];
+    let pointer = '';
+    if (['local', 'argument', 'this', 'that'].includes(segment)) {
+        switch(segment) {
+            case 'local':
+                pointer = 'LCL'
+                break;
+            case 'argument':
+                pointer = 'ARG'
+                break;
+            case 'this':
+                pointer = 'THIS'
+                break;
+            case 'that':
+                pointer = 'THAT'
+                break;
+        }
+
+        hackInstructions.push(`@${pointer}`);
+        hackInstructions.push('D=M');
+        hackInstructions.push(`@${argument}`);
+        hackInstructions.push('D=D+A');
+        hackInstructions.push('@focuspointer');
+        hackInstructions.push('M=D');
+    }
+    return hackInstructions;
+}
+
 // Returns an array containing the hack instructions necessary
 // to push the value of the D register onto the stack
 function pushDRegister() {
@@ -93,7 +181,7 @@ function popStackIntoMRegister() {
     hackInstructions.push('@SP');
     hackInstructions.push('M=M-1');
     // M = *SP
-    hackInstructions.push('@SP');
+    //hackInstructions.push('@SP');
     hackInstructions.push('A=M');
     return hackInstructions;
 }

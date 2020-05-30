@@ -6,6 +6,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "basic-test": "node index.js '../MemoryAccess/BasicTest/BasicTest.vm'",
+    "pointer-test": "node index.js '../MemoryAccess/PointerTest/PointerTest.vm'",
+    "static-test": "node index.js '../MemoryAccess/StaticTest/StaticTest.vm'",
     "simple-add": "node index.js '../StackArithmetic/SimpleAdd/SimpleAdd.vm'",
     "stack-test": "node index.js '../StackArithmetic/StackTest/StackTest.vm'"
   },
