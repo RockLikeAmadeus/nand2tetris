@@ -6,8 +6,12 @@ const translate = require('./translator');
 const printer = require('./printer');
 
 // Read the file in
-const fileName = process.argv[2]
-let file = fs.readFileSync(fileName, 'utf8');
+const fileNameFull = process.argv[2]
+const fileName = fileNameFull.substring(
+    fileNameFull.lastIndexOf('/')+1, 
+    fileNameFull.length-3
+)
+let file = fs.readFileSync(fileNameFull, 'utf8');
 let progRaw = file.split('\n');
 
 console.log('Original program:\n');
@@ -28,7 +32,7 @@ printer.printProgram(prog);
 
 // Write translated program to file
 fs.writeFile(
-    `${fileName.substring(0, fileName.length-2)}asm`,
+    `${fileNameFull.substring(0, fileNameFull.length-2)}asm`,
     prog.join('\n'),
     (err) => {
         if (err) return console.log(err);

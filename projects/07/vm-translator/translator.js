@@ -38,8 +38,26 @@ module.exports = function translate(fileName, prog) {
                                     segment, argument
                                 ))
                             result = result.concat(pushDRegister());
+                            break;
                         case 'static':
                             result.push(`@${fileName}.${argument}`);
+                            result.push('D=M');
+                            result = result.concat(pushDRegister());
+                            break;
+                        case 'temp':
+                            result.push(`@${5 + (+argument)}`);
+                            result.push('D=M');
+                            result = result.concat(pushDRegister());
+                            break;
+                        case 'pointer':
+                            switch (+argument) {
+                                case 0:
+                                    result.push('@THIS')
+                                    break;
+                                case 1:
+                                    result.push('@THAT')
+                                    break;
+                            }
                             result.push('D=M');
                             result = result.concat(pushDRegister());
                             break;
@@ -62,6 +80,24 @@ module.exports = function translate(fileName, prog) {
                             result = result.concat(popStackIntoDRegister());
                             result.push(`@${fileName}.${argument}`);
                             result.push('M=D');
+                            break;
+                        case 'temp':
+                            result = result.concat(popStackIntoDRegister());
+                            result.push(`@${5 + (+argument)}`);
+                            result.push('M=D');
+                            break;
+                        case 'pointer':
+                            result = result.concat(popStackIntoDRegister());
+                            switch (+argument) {
+                                case 0:
+                                    result.push('@THIS')
+                                    break;
+                                case 1:
+                                    result.push('@THAT')
+                                    break;
+                            }
+                            result.push('M=D');
+                            break;
                     }
                     break;
             }
