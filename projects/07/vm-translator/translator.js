@@ -3,7 +3,7 @@
 const printer = require('./printer')
 const LabelMaker = require('./label-maker');
 
-module.exports = function translate(prog) {
+module.exports = function translate(fileName, prog) {
 
     let result = [];
 
@@ -38,6 +38,12 @@ module.exports = function translate(prog) {
                                     segment, argument
                                 ))
                             result = result.concat(pushDRegister());
+                        case 'static':
+                            result.push(`@${fileName}.${argument}`);
+                            result.push('D=M');
+                            result = result.concat(pushDRegister());
+                            break;
+
                     }
                     break;
                 case 'pop':
@@ -51,6 +57,11 @@ module.exports = function translate(prog) {
                             );
                             result = result.concat(popStackIntoDRegister());
                             result = result.concat(loadMemoryWithDRegister());
+                            break;
+                        case 'static':
+                            result = result.concat(popStackIntoDRegister());
+                            result.push(`@${fileName}.${argument}`);
+                            result.push('M=D');
                     }
                     break;
             }

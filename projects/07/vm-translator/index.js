@@ -6,7 +6,8 @@ const translate = require('./translator');
 const printer = require('./printer');
 
 // Read the file in
-let file = fs.readFileSync(process.argv[2], 'utf8');
+const fileName = process.argv[2]
+let file = fs.readFileSync(fileName, 'utf8');
 let progRaw = file.split('\n');
 
 console.log('Original program:\n');
@@ -22,12 +23,12 @@ printer.printSeparator();
 printer.printSeparator();
 
 // Translate VM Code
-prog = translate(prog);
+prog = translate(fileName, prog);
 printer.printProgram(prog);
 
 // Write translated program to file
 fs.writeFile(
-    `${process.argv[2].substring(0, process.argv[2].length-2)}asm`,
+    `${fileName.substring(0, fileName.length-2)}asm`,
     prog.join('\n'),
     (err) => {
         if (err) return console.log(err);
