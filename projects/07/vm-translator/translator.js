@@ -150,25 +150,26 @@ function comparisonOp(operator) {
     const hackInstructions = []
     const location1 = LabelMaker.GetLabel();
     const end = LabelMaker.GetLabel();
+    hackInstructions.push('D=M-D');
     hackInstructions.push(`@${location1}`);
 
     switch (operator) {
         case 'eq':
-            hackInstructions.push('M-D;JNE');
+            hackInstructions.push('D;JEQ');
             break;
         case 'gt':
-            hackInstructions.push('M-D;JGT');
+            hackInstructions.push('D;JGT');
             break;
         case 'lt':
-            hackInstructions.push('M-D;JLT');
+            hackInstructions.push('D;JLT');
             break;
     }
 
-    hackInstructions.push('D=-1') // TRUE
+    hackInstructions.push('D=0') // TRUE
     hackInstructions.push(`@${end}`)
     hackInstructions.push('0;JMP');
     hackInstructions.push(`(${location1})`);
-    hackInstructions.push('D=0') // FALSE
+    hackInstructions.push('D=-1') // FALSE
     hackInstructions.push(`(${end})`);
     return hackInstructions;
 }
